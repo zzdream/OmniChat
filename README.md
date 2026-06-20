@@ -1,4 +1,4 @@
-# Study LLM
+# LLM
 
 基于 **Vue 3 + FastAPI + DeepSeek** 的全栈流式 AI 聊天应用，适合作为前端 / 全栈学习项目与作品集展示。
 
@@ -15,7 +15,7 @@
 
 ## 在线 Demo
 
-> 部署后把链接填在这里，例如：`https://study-llm.vercel.app`
+> 部署后把链接填在这里，例如：`https://llm.vercel.app`
 
 本地体验：
 

@@ -9,3 +9,12 @@ slowapi
 FlagEmbedding
 chromadb
 sqlalchemy
+pypdf
+python-docx
+doc2txt
+openpyxl
+xlrd
+python-pptx
+rapidocr-onnxruntime
+opencv-python-headless
+pymupdf

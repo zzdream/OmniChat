@@ -15,5 +15,5 @@ def test_read_root(client: TestClient) -> None:
 
     assert response.status_code == 200
     body = response.json()
-    assert body["message"] == "Study LLM API is running"
+    assert body["message"] == "LLM API is running"
     assert body["chat_stream"] == "/chat/stream"

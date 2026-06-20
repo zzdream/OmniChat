@@ -1,4 +1,4 @@
-# Study LLM — 后端服务
+# LLM — 后端服务
 
 基于 **Python + FastAPI** 的 AI 聊天机器人后端，对接 **DeepSeek** 模型 API。
 

@@ -71,13 +71,13 @@
               <div class="knowledge-main__intro">
                 <h1>{{ activeBase.name }}</h1>
                 <p v-if="activeBase.description">{{ activeBase.description }}</p>
-                <p v-else class="knowledge-main__hint">支持 .txt / .md / .markdown，单文件最大 5MB</p>
+                <p v-else class="knowledge-main__hint">支持 {{ RAG_ALLOWED_EXTENSIONS_LABEL }}，单文件最大 5MB</p>
               </div>
               <a-upload
                 :show-upload-list="false"
                 :before-upload="handleBeforeUpload"
                 :disabled="uploading"
-                accept=".txt,.md,.markdown"
+                accept=".txt,.md,.markdown,.pdf,.doc,.docx,.xlsx,.xls,.pptx,.ppt,.png,.jpg,.jpeg,.webp"
               >
                 <a-button type="primary" :loading="uploading">上传文档</a-button>
               </a-upload>
@@ -134,7 +134,7 @@
                   :show-upload-list="false"
                   :before-upload="handleBeforeUpload"
                   :disabled="uploading"
-                  accept=".txt,.md,.markdown"
+                  accept=".txt,.md,.markdown,.pdf,.doc,.docx,.xlsx,.xls,.pptx,.ppt,.png,.jpg,.jpeg,.webp"
                 >
                   <a-button type="primary" ghost :loading="uploading">上传第一个文档</a-button>
                 </a-upload>
@@ -169,7 +169,7 @@
 import type { UploadProps } from 'ant-design-vue'
 import { message, theme as antTheme } from 'ant-design-vue'
 import AppNav from '@/components/app-nav.vue'
-import { DOCUMENT_STATUS_LABEL, RAG_ALLOWED_EXTENSIONS } from '@/constants/rag'
+import { DOCUMENT_STATUS_LABEL, RAG_ALLOWED_EXTENSIONS, RAG_ALLOWED_EXTENSIONS_LABEL } from '@/constants/rag'
 import { useKnowledge } from '@/hooks/use-knowledge'
 import { useAppStore } from '@/store/modules/app'
 
@@ -257,7 +257,7 @@ async function handleDeleteDoc(id: string) {
 const handleBeforeUpload: UploadProps['beforeUpload'] = async file => {
   const ext = `.${file.name.split('.').pop()?.toLowerCase() ?? ''}`
   if (!RAG_ALLOWED_EXTENSIONS.includes(ext)) {
-    message.error('仅支持 .txt / .md / .markdown')
+    message.error(`仅支持 ${RAG_ALLOWED_EXTENSIONS_LABEL}`)
     return false
   }
 

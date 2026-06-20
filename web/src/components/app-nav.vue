@@ -1,6 +1,6 @@
 <template>
   <nav class="app-nav">
-    <RouterLink class="app-nav__brand" to="/">Study LLM</RouterLink>
+    <RouterLink class="app-nav__brand" to="/">LLM</RouterLink>
     <div class="app-nav__links">
       <RouterLink class="app-nav__link" to="/chat">自由对话</RouterLink>
       <RouterLink class="app-nav__link" to="/knowledge">知识库</RouterLink>

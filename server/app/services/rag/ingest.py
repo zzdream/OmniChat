@@ -4,25 +4,9 @@ from pathlib import Path
 
 from app.services.rag.chunking import split_text
 from app.services.rag.embedding import embed_texts
+from app.services.rag.errors import IngestError
+from app.services.rag.parsers import parse_document
 from app.services.rag.vector_store import delete_document_chunks, upsert_chunks
-
-
-class IngestError(Exception):
-    pass
-
-
-def read_text_file(file_path: Path) -> str:
-    suffix = file_path.suffix.lower()
-    if suffix not in {".txt", ".md", ".markdown"}:
-        raise IngestError(f"不支持的文件类型: {suffix}")
-
-    for encoding in ("utf-8", "utf-8-sig", "gbk"):
-        try:
-            return file_path.read_text(encoding=encoding)
-        except UnicodeDecodeError:
-            continue
-
-    raise IngestError("无法识别文件编码，请使用 UTF-8 文本")
 
 
 def index_document(
@@ -32,7 +16,7 @@ def index_document(
     filename: str,
     file_path: Path,
 ) -> int:
-    text = read_text_file(file_path)
+    text = parse_document(file_path)
     chunks = split_text(text)
     if not chunks:
         raise IngestError("文档内容为空")

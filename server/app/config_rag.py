@@ -40,10 +40,17 @@ class RagSettings:
 
     allowed_extensions: frozenset[str] = frozenset(
         ext.strip().lower()
-        for ext in os.getenv("RAG_ALLOWED_EXTENSIONS", ".txt,.md,.markdown").split(",")
+        for ext in os.getenv(
+            "RAG_ALLOWED_EXTENSIONS",
+            ".txt,.md,.markdown,.pdf,.doc,.docx,.xlsx,.xls,.pptx,.ppt,.png,.jpg,.jpeg,.webp",
+        ).split(",")
         if ext.strip()
     )
     max_upload_bytes: int = int(os.getenv("RAG_MAX_UPLOAD_BYTES", str(5 * 1024 * 1024)))
+
+    ocr_enabled: bool = os.getenv("RAG_OCR_ENABLED", "true").lower() == "true"
+    ocr_pdf_zoom: float = float(os.getenv("RAG_OCR_PDF_ZOOM", "2"))
+    ocr_max_pdf_pages: int = int(os.getenv("RAG_OCR_MAX_PDF_PAGES", "50"))
 
     rate_limit_rag: str = os.getenv("RATE_LIMIT_RAG", "10/minute")
 

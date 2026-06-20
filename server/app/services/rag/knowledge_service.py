@@ -8,7 +8,8 @@ from sqlalchemy.orm import Session
 from app.config_rag import get_rag_settings
 from app.db.models import Document, KnowledgeBase
 from app.db.session import get_session
-from app.services.rag.ingest import IngestError, index_document
+from app.services.rag.errors import IngestError
+from app.services.rag.ingest import index_document
 from app.services.rag.vector_store import delete_collection, delete_document_chunks
 
 

@@ -1,4 +1,4 @@
-# Study LLM — 前端
+# LLM — 前端
 
 Vue 3 + TypeScript + Vite 聊天界面，通过 Vite 代理联调 FastAPI 后端。
 
@@ -23,7 +23,7 @@ pnpm dev
 `.env` / `.env.development`：
 
 ```env
-VITE_APP_TITLE=Study LLM
+VITE_APP_TITLE=LLM
 VITE_BASE_API=http://localhost:8000
 ```
 

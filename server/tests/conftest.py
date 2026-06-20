@@ -13,6 +13,10 @@ _rag_test_dir = tempfile.mkdtemp(prefix="studyllm_rag_test_")
 os.environ.setdefault("RAG_SQLITE_PATH", os.path.join(_rag_test_dir, "rag.db"))
 os.environ.setdefault("RAG_CHROMA_DIR", os.path.join(_rag_test_dir, "chroma"))
 os.environ.setdefault("RAG_UPLOAD_DIR", os.path.join(_rag_test_dir, "uploads"))
+os.environ["RAG_ALLOWED_EXTENSIONS"] = (
+    ".txt,.md,.markdown,.pdf,.doc,.docx,.xlsx,.xls,.pptx,.ppt,.png,.jpg,.jpeg,.webp"
+)
+os.environ.setdefault("RAG_OCR_ENABLED", "true")
 
 import pytest
 from fastapi.testclient import TestClient

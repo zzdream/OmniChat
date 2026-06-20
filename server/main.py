@@ -29,7 +29,7 @@ settings = get_settings()
 app = FastAPI(
     title=settings.app_name,
     version=settings.app_version,
-    description="Study LLM 后端服务 — AI 聊天机器人 API",
+    description="LLM 后端服务 — AI 聊天机器人 API",
 )
 
 # 限流：按 IP 统计，超出返回 429
@@ -69,7 +69,7 @@ def read_root() -> dict[str, str]:  # 返回值类型为dict[str, str]
     类似前端首页的一个 status JSON
     """
     return {
-        "message": "Study LLM API is running",
+        "message": "LLM API is running",
         "docs": "/docs",                    # FastAPI 自动生成的 Swagger 文档
         "health": "/health",
         "chat": "/chat",
