@@ -1,6 +1,6 @@
 # LLM — 后端服务
 
-基于 **Python + FastAPI** 的 AI 聊天机器人后端，对接 **DeepSeek** 模型 API。
+基于 **Python + FastAPI** 的 AI 后端，对接 **DeepSeek**，并扩展 **RAG 知识库**、**工具 Agent** 与 **3D Scene Agent**。
 
 ## 环境要求
 
@@ -16,7 +16,6 @@ cd server
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
-# pip install fastapi uvicorn openai python-multipart python-dotenv
 ```
 
 激活成功后，终端提示符前会出现 `(venv)`。
@@ -81,18 +80,12 @@ DEEPSEEK_BASE_URL=https://api.deepseek.com
 DEEPSEEK_MODEL=deepseek-v4-flash
 ```
 
-`.env.example` 示例（模板，用占位符即可）：
-
-```env
-DEEPSEEK_API_KEY=sk-your-api-key-here
-DEEPSEEK_BASE_URL=https://api.deepseek.com
-DEEPSEEK_MODEL=deepseek-v4-flash
-```
-
 > **为什么不要把真实 Key 写在 `.env.example`？**  
 > 这个文件通常会提交到 Git。一旦 push 到 GitHub/Gitee，密钥就泄露了，别人可以用你的额度。
 
 > `.env` 已在 `.gitignore` 中，只存在你本机，可以放心填真实 Key。
+
+Phase 2～4 的 RAG、Agent、Scene 相关变量见 `.env.example` 底部注释块。
 
 ## 五、依赖说明
 
@@ -101,8 +94,12 @@ DEEPSEEK_MODEL=deepseek-v4-flash
 | fastapi | Web 框架 |
 | uvicorn | ASGI 服务器 |
 | openai | 调用 DeepSeek（OpenAI 兼容接口） |
+| langchain / langgraph | Agent 编排与工具调用 |
+| chromadb | 向量存储 |
+| FlagEmbedding / sentence-transformers | BGE-M3 嵌入 |
 | python-dotenv | 读取 `.env` 配置 |
 | python-multipart | FastAPI 表单 / 文件上传支持 |
+| slowapi | 请求限流 |
 
 ## 六、启动服务
 
@@ -121,9 +118,59 @@ python main.py
 
 - 根路径：<http://127.0.0.1:8000/>
 - 健康检查：<http://127.0.0.1:8000/health>
-- 聊天接口：<http://127.0.0.1:8000/chat>（POST）
-- 流式聊天：<http://127.0.0.1:8000/chat/stream>（POST，SSE）
 - API 文档：<http://127.0.0.1:8000/docs>
+
+## API 一览
+
+| 接口 | 说明 | Phase |
+|------|------|-------|
+| `POST /chat/stream` | 自由对话 SSE | 1 |
+| `GET/POST/DELETE /knowledge/bases` | 知识库管理 | 2 |
+| `POST /knowledge/bases/{id}/documents` | 上传文档 | 2 |
+| `POST /chat/rag/stream` | 知识库问答 SSE | 2 |
+| `POST /chat/tools/stream` | Function Calling Agent SSE | 3 |
+| `POST /chat/agent/stream` | LangChain Agent SSE | 3 |
+| `POST /chat/scene/stream` | 3D 场景 Agent SSE | 4 |
+
+### Phase 1：流式对话
+
+`POST /chat/stream`，请求体与响应格式见下方「SSE 流式输出」。
+
+### Phase 2：知识库 RAG
+
+- 文档解析支持 txt、md、pdf、Word、Excel、PPT、图片（OCR）
+- 分块写入 Chroma，问答时检索 Top-K 片段注入 Prompt
+- `POST /chat/rag/stream` 请求体含 `knowledge_base_id`、`message`、`history` 等
+
+### Phase 3：工具 Agent
+
+- `POST /chat/tools/stream` — 原生 Function Calling
+- `POST /chat/agent/stream` — LangChain Agent
+- 内置工具：`calculator`、`text_formatter`；绑定知识库时可用 `rag_search`
+- 环境变量：`TOOLS_MAX_ITERATIONS`、`AGENT_MAX_ITERATIONS`、`LLM_RETRY_*`
+
+### Phase 4：Scene Agent
+
+`POST /chat/scene/stream` — 在 Agent 请求基础上附加：
+
+- `scene_objects` — 前端上报的对象快照（id、name、position、rotation、scale）
+- `selected_object_id` — 当前选中对象
+
+Agent 可用工具：
+
+| 工具 | 作用 |
+|------|------|
+| `scene_list_objects` | 列出场景对象 |
+| `scene_move_object` | 平移 |
+| `scene_rotate_object` | 旋转 |
+| `scene_focus_object` | 相机聚焦 |
+| `scene_highlight_object` | 高亮 |
+| `scene_clear_highlight` | 清除高亮 |
+| `rag_search` | （可选）检索绑定的知识库 |
+
+工具返回的 JSON 指令通过 SSE `scene_action` 事件推送给前端执行。
+
+相关配置：`config_scene.py`（`SCENE_DEFAULT_SYSTEM`、`RATE_LIMIT_SCENE` 等）。
 
 ## 步骤 2：DeepSeek 聊天接口
 
@@ -168,7 +215,7 @@ curl -N -X POST http://127.0.0.1:8000/chat/stream \
 
 ### SSE 数据格式
 
-每个事件一行 `data:`，JSON  payload：
+每个事件一行 `data:`，JSON payload：
 
 ```
 data: {"content": "Fast"}
@@ -184,9 +231,18 @@ data: {"done": true}
 data: {"error": "DeepSeek API 调用失败: ..."}
 ```
 
+Scene Agent 额外事件示例：
+
+```
+data: {"scene_action": {"type": "move", "objectName": "bus", "axis": "x", "distance": 2}}
+```
+
 ### 前端消费
 
-已实现于 `web/src/api/chat.ts` 与 `web/src/hooks/use-chat-stream.ts`。
+- Phase 1：`web/src/api/chat.ts`、`web/src/hooks/use-chat-stream.ts`
+- Phase 2：`web/src/api/chat-rag.ts`、`web/src/hooks/use-rag-chat.ts`
+- Phase 3：`web/src/api/agent-chat.ts`、`web/src/hooks/use-agent-chat.ts`
+- Phase 4：`web/src/api/scene-agent.ts`、`web/src/hooks/use-scene-agent.ts`
 
 ## 步骤 4：CORS + 前后端联调
 
@@ -228,7 +284,7 @@ cd web
 pnpm dev
 ```
 
-浏览器打开 <http://localhost:5173/chat>，即可使用 AI 聊天页面。
+浏览器打开 <http://localhost:5173/chat>，导航栏可切换各 Phase 页面。
 
 ## 运行测试
 
@@ -241,27 +297,44 @@ pip install -r requirements-dev.txt
 pytest
 ```
 
-覆盖范围：`/health`、请求校验（敏感词/历史条数）、SSE 流式响应、`build_messages` 多轮拼接。
+覆盖范围：健康检查、聊天校验、SSE 流式、RAG 检索、Agent 工具链、Scene 工具与 `/chat/scene/stream`。
 
 ## 项目结构
 
 ```
 server/
-├── main.py                 # 应用入口，uvicorn 启动点
+├── main.py                      # 应用入口，挂载 Phase 1–4
 ├── app/
-│   ├── config.py           # 环境变量与配置
+│   ├── config.py                # 基础配置
+│   ├── config_rag.py            # RAG 配置
+│   ├── config_agent.py          # Agent 配置
+│   ├── config_scene.py          # Scene Agent 配置
+│   ├── bootstrap_rag.py         # 挂载 knowledge + chat_rag
+│   ├── bootstrap_tools.py       # 挂载 chat_tools
+│   ├── bootstrap_agent.py       # 挂载 chat_agent
+│   ├── bootstrap_scene.py       # 挂载 chat_scene
 │   ├── schemas/
-│   │   └── chat.py         # 聊天请求/响应模型
+│   │   ├── chat.py
+│   │   ├── chat_rag.py
+│   │   ├── chat_agent.py
+│   │   └── chat_scene.py
 │   ├── services/
-│   │   └── llm.py          # DeepSeek 调用（含 stream=True）
-│   └── api/
-│       └── routes/
-│           ├── health.py   # 健康检查
-│           └── chat.py     # POST /chat、POST /chat/stream
+│   │   ├── llm.py
+│   │   ├── rag/                 # 解析、分块、嵌入、检索
+│   │   ├── agent/               # langchain_agent、scene_agent
+│   │   └── tools/               # calculator、rag_search、scene_actions
+│   └── api/routes/
+│       ├── health.py
+│       ├── chat.py
+│       ├── knowledge.py
+│       ├── chat_rag.py
+│       ├── chat_tools.py
+│       ├── chat_agent.py
+│       └── chat_scene.py
 ├── requirements.txt
-├── requirements-dev.txt  # pytest 等开发依赖
+├── requirements-dev.txt
 ├── pytest.ini
-├── tests/                # API 与单元测试
+├── tests/
 ├── .env.example
 └── README.md
 ```
@@ -274,6 +347,14 @@ server/
 
 ```bash
 pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
+```
+
+### RAG 首次启动下载模型很慢
+
+在 `.env` 中设置 HuggingFace 镜像：
+
+```env
+HF_ENDPOINT=https://hf-mirror.com
 ```
 
 ### macOS 提示 `command not found: python3`

@@ -9,10 +9,12 @@
 3. **03-model-settings.png** — 工具栏「模型设置」展开（模型下拉 + 温度滑块）
 4. **04-dark-mode.png** — 深色主题下的对话界面
 5. **05-export.png** — 导出下拉菜单 + 消息下方 Token 用量
+6. **06-scene-agent.png** — （可选）3D 场景 Agent：GLB 模型 + 侧栏列表 + 对话区
 
 ## 可选 GIF
 
 - **demo.gif** — 10～20 秒：发送消息 → 流式输出 → 切换深色模式
+- **scene-demo.gif** — （可选）上传 GLB → 语音/文字控制模型移动
 
 ## 录制建议
 
