@@ -100,6 +100,13 @@ flowchart TB
 
 ## 快速开始
 
+> **Clone 后完整使用教程（安装 + Phase 1～4 操作步骤）见 [docs/GETTING_STARTED.md](docs/GETTING_STARTED.md)。**
+
+```bash
+git clone https://github.com/zzdream/OmniChat.git
+cd OmniChat
+```
+
 ### 一键启动（推荐）
 
 完成下方「首次初始化」后，在**项目根目录**执行：
@@ -167,6 +174,7 @@ cd web && pnpm typecheck && pnpm test:run
 studyLLM/
 ├── README.md
 ├── docs/
+│   ├── GETTING_STARTED.md    # Clone 后上手指南
 │   └── screenshots/          # 作品集截图
 ├── server/                   # FastAPI + DeepSeek
 │   ├── main.py               # 入口，挂载 Phase 1–4 路由
