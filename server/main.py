@@ -21,6 +21,7 @@ from app.api.routes import chat, health
 from app.bootstrap_rag import setup_rag
 from app.bootstrap_tools import setup_tools
 from app.bootstrap_agent import setup_agent
+from app.bootstrap_scene import setup_scene
 from app.config import get_settings
 from app.core.limiter import limiter
 
@@ -64,6 +65,7 @@ app.include_router(chat.router)
 setup_rag(app)
 setup_tools(app)
 setup_agent(app)
+setup_scene(app)
 
 
 @app.get("/") # 这是 装饰器（decorator） 语法：把下面的函数「注册」成某个 HTTP 接口。等价于 app.get("/", read_root)
@@ -82,6 +84,7 @@ def read_root() -> dict[str, str]:  # 返回值类型为dict[str, str]
         "chat_rag_stream": "/chat/rag/stream",
         "chat_tools_stream": "/chat/tools/stream",
         "chat_agent_stream": "/chat/agent/stream",
+        "chat_scene_stream": "/chat/scene/stream",
     }
 
 

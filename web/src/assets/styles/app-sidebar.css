@@ -2,6 +2,7 @@
 
 .rag-sidebar,
 .agent-sidebar,
+.scene-sidebar,
 .knowledge-sidebar {
   flex-shrink: 0;
   width: var(--sidebar-width);
@@ -356,7 +357,8 @@
 
 @media (max-width: 768px) {
   .rag-sidebar,
-  .agent-sidebar {
+  .agent-sidebar,
+  .scene-sidebar {
     position: fixed;
     top: 0;
     left: 0;
@@ -367,7 +369,8 @@
   }
 
   .rag-sidebar--open,
-  .agent-sidebar--open {
+  .agent-sidebar--open,
+  .scene-sidebar.agent-sidebar--open {
     transform: translateX(0);
   }
 }

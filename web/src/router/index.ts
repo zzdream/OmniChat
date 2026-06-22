@@ -28,6 +28,12 @@ const routes: RouteRecordRaw[] = [
     name: 'AgentChat',
     component: () => import('@/views/agent-chat/index.vue'),
     meta: { title: '工具 Agent' }
+  },
+  {
+    path: '/scene-agent',
+    name: 'SceneAgent',
+    component: () => import('@/views/scene-agent/index.vue'),
+    meta: { title: '3D 场景 Agent' }
   }
 ]
 

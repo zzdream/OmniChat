@@ -6,6 +6,7 @@
       <RouterLink class="app-nav__link" to="/knowledge">知识库</RouterLink>
       <RouterLink class="app-nav__link" to="/rag-chat">知识库问答</RouterLink>
       <RouterLink class="app-nav__link" to="/agent-chat">工具 Agent</RouterLink>
+      <RouterLink class="app-nav__link" to="/scene-agent">3D 场景 Agent</RouterLink>
     </div>
     <button
       class="app-nav__theme"

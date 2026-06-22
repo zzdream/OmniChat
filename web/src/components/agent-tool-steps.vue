@@ -29,12 +29,13 @@ import type { AgentToolStep } from '@/types/agent'
 const props = defineProps<{
   steps: AgentToolStep[]
   expanded?: boolean
+  toolLabels?: Record<string, string>
 }>()
 
 const callCount = computed(() => props.steps.filter(item => item.type === 'tool_call').length)
 
 function toolLabel(name: string) {
-  return AGENT_TOOL_LABELS[name] ?? name
+  return props.toolLabels?.[name] ?? AGENT_TOOL_LABELS[name] ?? name
 }
 
 function formatArgs(raw: string) {
